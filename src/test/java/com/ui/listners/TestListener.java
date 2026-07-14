@@ -32,18 +32,49 @@ public class TestListener implements ITestListener {
 		ExtentReporterUtility.getTest().log(Status.PASS, result.getMethod().getMethodName() + " " + "PASSED");
 	}
 
+//	@Override
+//	public void onTestFailure(ITestResult result) {
+//		logger.error(result.getMethod().getMethodName() + " " + "FAILED");
+//		logger.error(result.getThrowable().getMessage());
+//		ExtentReporterUtility.getTest().log(Status.FAIL, result.getMethod().getMethodName() + " " + "FAILED");
+//		ExtentReporterUtility.getTest().log(Status.FAIL, result.getThrowable().getMessage());
+//
+//		Object testClass = result.getInstance();
+//		
+//		BrowserUtility browserUtility = ((TestBase) testClass).getInstance();
+//		logger.info("Capturing screenshot for the failed test");
+//		
+//		String screenshotPath = browserUtility.takeScreenshot(result.getMethod().getMethodName());
+//		logger.info("Attaching screenshot for the failed test");
+//		ExtentReporterUtility.getTest().addScreenCaptureFromPath(screenshotPath);
+//	}
+
 	@Override
 	public void onTestFailure(ITestResult result) {
 		logger.error(result.getMethod().getMethodName() + " " + "FAILED");
-		logger.error(result.getThrowable().getMessage());
+		Throwable t = result.getThrowable();
+		logger.error(t != null ? t.getMessage() : "No throwable captured");
+
+		if (ExtentReporterUtility.getTest() == null) {
+			logger.error("ExtentTest is null for thread: " + Thread.currentThread().getId()
+					+ " - skipping report logging for this failure");
+			return;
+		}
+
 		ExtentReporterUtility.getTest().log(Status.FAIL, result.getMethod().getMethodName() + " " + "FAILED");
-		ExtentReporterUtility.getTest().log(Status.FAIL, result.getThrowable().getMessage());
+		ExtentReporterUtility.getTest().log(Status.FAIL, t != null ? t.getMessage() : "Unknown failure");
 
 		Object testClass = result.getInstance();
-		
 		BrowserUtility browserUtility = ((TestBase) testClass).getInstance();
+
+		if (browserUtility == null) {
+			logger.error("Driver/HomePage was never initialized - setup() likely threw an exception "
+					+ "before the test ran (e.g. config/property loading failure)");
+			ExtentReporterUtility.getTest().log(Status.FAIL, "Screenshot skipped: browser was never initialized");
+			return;
+		}
+
 		logger.info("Capturing screenshot for the failed test");
-		
 		String screenshotPath = browserUtility.takeScreenshot(result.getMethod().getMethodName());
 		logger.info("Attaching screenshot for the failed test");
 		ExtentReporterUtility.getTest().addScreenCaptureFromPath(screenshotPath);
