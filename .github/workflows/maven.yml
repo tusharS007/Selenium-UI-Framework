@@ -62,6 +62,7 @@ jobs:
         cp -R extentReport.html public/extent-reports/report.html
         mkdir -p screenshots
         cp -R screenshots/ public/extent-reports/screenshots/ || echo "No screenshots to copy"
+        touch public/extent-reports/.nojekyll
         ls -l
 
     - name: Deploy
