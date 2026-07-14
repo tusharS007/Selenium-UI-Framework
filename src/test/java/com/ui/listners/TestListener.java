@@ -26,6 +26,7 @@ public class TestListener implements ITestListener {
 		ExtentReporterUtility.createExtentTest(result.getMethod().getMethodName());
 	}
 
+	@Override
 	public void onTestSuccess(ITestResult result) {
 		logger.info(result.getMethod().getMethodName() + " " + "PASSED");
 		ExtentReporterUtility.getTest().log(Status.PASS, result.getMethod().getMethodName() + " " + "PASSED");
@@ -39,8 +40,10 @@ public class TestListener implements ITestListener {
 		ExtentReporterUtility.getTest().log(Status.FAIL, result.getThrowable().getMessage());
 
 		Object testClass = result.getInstance();
+		
 		BrowserUtility browserUtility = ((TestBase) testClass).getInstance();
 		logger.info("Capturing screenshot for the failed test");
+		
 		String screenshotPath = browserUtility.takeScreenshot(result.getMethod().getMethodName());
 		logger.info("Attaching screenshot for the failed test");
 		ExtentReporterUtility.getTest().addScreenCaptureFromPath(screenshotPath);
